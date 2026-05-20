@@ -1,0 +1,10 @@
+# Sensitive files — never commit these
+.env
+*.key
+*.pem
+*.p12
+wallet*
+secret*
+**/node_modules/
+__pycache__/
+.DS_Store
