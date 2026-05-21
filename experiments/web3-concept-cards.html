@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web3 概念卡片 — AI × Web3 School</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --accent: #8b5cf6;
+    --accent2: #a78bfa;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --card-front: #1e293b;
+    --card-back: #8b5cf6;
+    --radius: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  .header {
+    text-align: center;
+    max-width: 700px;
+    margin-bottom: 24px;
+  }
+  .header h1 {
+    font-size: 1.8em;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent2), #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .header p { color: var(--text2); font-size: 0.95em; line-height: 1.5; }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .tab-btn {
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--surface2);
+    background: var(--surface);
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { border-color: var(--accent); color: var(--text); }
+  .tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .progress-bar {
+    width: 100%;
+    max-width: 400px;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--success));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .stats {
+    font-size: 0.85em;
+    color: var(--text2);
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  .stats span em { font-style: normal; color: var(--accent2); font-weight: 700; }
+
+  .card-container {
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 3/2;
+    perspective: 1200px;
+    cursor: pointer;
+    margin-bottom: 24px;
+  }
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    transform-style: preserve-3d;
+  }
+  .card-container.flipped .card-inner { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .card-front {
+    background: var(--card-front);
+    border: 1px solid var(--surface2);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  .card-front .topic-tag {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-size: 0.7em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--surface2);
+    color: var(--text2);
+    font-weight: 600;
+  }
+  .card-front .card-number {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 0.75em;
+    color: var(--text2);
+  }
+  .card-front h2 {
+    font-size: 1.6em;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+  .card-front .hint {
+    font-size: 0.85em;
+    color: var(--text2);
+  }
+  .card-back {
+    background: var(--card-back);
+    transform: rotateY(180deg);
+    justify-content: flex-start;
+    padding: 28px 24px;
+    overflow-y: auto;
+    text-align: left;
+  }
+  .card-back h3 {
+    font-size: 1.1em;
+    font-weight: 700;
+    margin-bottom: 6px;
+    width: 100%;
+  }
+  .card-back .back-topic {
+    font-size: 0.7em;
+    opacity: 0.7;
+    margin-bottom: 12px;
+    width: 100%;
+  }
+  .card-back p {
+    font-size: 0.88em;
+    line-height: 1.6;
+    opacity: 0.92;
+    width: 100%;
+  }
+  .card-back .example {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 10px;
+    font-size: 0.82em;
+    line-height: 1.5;
+    width: 100%;
+  }
+  .card-back .example strong { font-weight: 700; }
+
+  .actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .btn {
+    padding: 10px 24px;
+    border-radius: 999px;
+    border: none;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-secondary { background: var(--surface2); color: var(--text); }
+  .btn-secondary:hover { background: #475569; transform: translateY(-1px); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-success:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-danger:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-sm { padding: 6px 14px; font-size: 0.8em; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .footer-note {
+    max-width: 500px;
+    font-size: 0.78em;
+    color: var(--text2);
+    text-align: center;
+    line-height: 1.6;
+    padding: 16px;
+    border-top: 1px solid var(--surface2);
+    margin-top: 16px;
+  }
+  .footer-note a { color: var(--accent2); text-decoration: none; }
+  .footer-note a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🧠 Web3 概念卡片</h1>
+  <p>基于 AI × Web3 School Handbook 的交互式学习工具<br>点击卡片翻转查看定义 ←→</p>
+</div>
+
+<div class="tabs" id="tabs">
+  <button class="tab-btn active" data-filter="all">全部 (16)</button>
+  <button class="tab-btn" data-filter="network">🌐 网络</button>
+  <button class="tab-btn" data-filter="crypto">🔐 密码学</button>
+  <button class="tab-btn" data-filter="wallet">👛 钱包</button>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="stats">
+  <span>📇 <em id="currentIdx">1</em> / <em id="totalCards">16</em></span>
+  <span>✅ 已掌握: <em id="masteredCount">0</em></span>
+</div>
+
+<div class="card-container" id="cardContainer">
+  <div class="card-inner" id="cardInner">
+    <div class="card-face card-front" id="cardFront">
+      <span class="topic-tag" id="topicTag">网络</span>
+      <span class="card-number" id="cardNum">1/16</span>
+      <h2 id="cardTitle">Block</h2>
+      <p class="hint">👆 点击翻转查看定义</p>
+    </div>
+    <div class="card-face card-back" id="cardBack">
+      <h3 id="backTitle">Block</h3>
+      <div class="back-topic" id="backTopic">🌐 网络</div>
+      <p id="backDef">定义加载中...</p>
+      <div class="example" id="backExample"></div>
+    </div>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn btn-secondary" id="prevBtn">← 上一张</button>
+  <button class="btn btn-success btn-sm" id="masterBtn">✅ 已掌握</button>
+  <button class="btn btn-secondary" id="shuffleBtn">🔀 随机</button>
+  <button class="btn btn-primary" id="nextBtn">下一张 →</button>
+</div>
+
+<div class="footer-note">
+  <strong>📖 内容来源：</strong><a href="https://aiweb3.school/zh/handbook/" target="_blank">AI × Web3 School Handbook</a>
+  — 网络 · 密码学 · 钱包 三章
+</div>
+
+<script>
+const concepts = [
+  {
+    topic: "network", topicLabel: "🌐 网络",
+    title: "Block · 区块",
+    def: "区块是交易被批量提交和排序的单位。一个区块包含交易列表、前一个区块的引用、状态根、时间戳和共识信息。交易进入区块后，节点执行这些交易并更新全局状态。新区块引用前一区块，形成可验证的历史链。",
+    example: "💡 以太坊平均出块时间约 12 秒。区块有 gas limit，网络吞吐不是无限的。"
+  },
+  {
+    topic: "network", topicLabel: "🌐 网络",
+    title: "Consensus · 共识",
+    def: "共识是网络决定「哪段历史有效」的机制。不同节点会收到交易、区块和网络消息，Consensus 让这些节点在没有中心数据库的情况下，对区块顺序和状态变化形成一致看法。",
+    example: "💡 对开发者来说，共识影响：交易需要等几个 confirmation 才算安全；区块可能短暂重组，前端不能过早假设最终结果。"
+  },
+  {
+    topic: "network", topicLabel: "🌐 网络",
+    title: "PoS · 权益证明",
+    def: "PoS（Proof of Stake）用质押和惩罚机制组织验证者，替代 PoW 挖矿来维护网络安全。验证者质押 ETH 参与区块提议和证明，行为错误可能被惩罚（Slashing）。",
+    example: "⚠️ 网络安全来自经济质押和节点参与，不是免费的。理解 PoS 才能理解为什么区块时间、最终性、验证者和 Slashing 会出现在网络层讨论里。"
+  },
+  {
+    topic: "network", topicLabel: "🌐 网络",
+    title: "Testnet · 测试网",
+    def: "测试网用于在接近真实链的环境里测试合约、前端和交易流程。Testnet 资产没有真实经济价值，但能验证部署脚本、钱包连接、RPC 配置、合约调用和区块浏览器验证。",
+    example: "💡 做项目时至少记录：部署在哪条测试网、合约地址和部署交易、使用哪个 RPC、前端如何切换 chain ID、测试资产从哪里获取。"
+  },
+  {
+    topic: "network", topicLabel: "🌐 网络",
+    title: "L2 · 二层网络",
+    def: "L2 是在主网安全和更低成本之间做扩展的网络层。通常把大量交易放到主网之外执行，再把结果或证明提交回主网。优势：费用更低、确认更快；代价：多了桥、提现等待和跨链状态同步。",
+    example: "⚠️ 产品设计不能只写「支持 Ethereum」。如果支持多个 L2，需要清楚展示当前网络、资产在哪条链、桥接需要多久。"
+  },
+  {
+    topic: "network", topicLabel: "🌐 网络",
+    title: "Rollup · 卷叠",
+    def: "Rollup 是主流 L2 扩展路线，把执行搬到链下或 L2，再把数据和结果提交到 L1。常见类型：Optimistic Rollup（乐观证明）和 ZK Rollup（零知识证明），在证明方式、提现延迟和开发体验上不同。",
+    example: "💡 Rollup 降低了单笔交易成本，但没有消除链上系统复杂度。仍然要处理跨链资产、RPC、合约地址和桥接风险。"
+  },
+  {
+    topic: "crypto", topicLabel: "🔐 密码学",
+    title: "Hash · 哈希",
+    def: "哈希函数把任意数据映射成固定长度的指纹，用来验证数据是否一致。哪怕输入只改一个字符，输出也会完全不同。哈希不是加密，不能被「解密回原文」。",
+    example: "💡 常见用途：交易哈希（定位交易）、区块哈希（定位区块）、合约字节码哈希（检查部署代码是否一致）、数据承诺（先公布哈希，之后验证原文没被改）。"
+  },
+  {
+    topic: "crypto", topicLabel: "🔐 密码学",
+    title: "Public Key · 公钥",
+    def: "公钥是和私钥成对出现的公开信息。别人可以用公钥验证某个签名确实来自对应私钥，但不能从公钥反推出私钥。在以太坊中，地址是公钥进一步处理后得到的短标识。",
+    example: "⚠️ 地址可以公开，私钥绝不能公开。地址不是身份本身，只是一个可验证控制关系的标识。某个地址「看起来像官方地址」没有意义。"
+  },
+  {
+    topic: "crypto", topicLabel: "🔐 密码学",
+    title: "Private Key · 私钥",
+    def: "私钥是账户控制权本身。任何把私钥暴露给网页、截图、日志或聊天工具的行为都极其危险。私钥一旦泄漏，攻击者可以直接转走资产或授权恶意合约。",
+    example: "🚨 私钥管理规则：不截图 · 不上传云盘 · 不粘贴给网页 · 不发给 AI 工具 · 不放进代码仓库 · 不用主钱包测试陌生 dApp"
+  },
+  {
+    topic: "crypto", topicLabel: "🔐 密码学",
+    title: "Signature · 签名",
+    def: "签名不是「登录弹窗」，而是对某段具体消息或交易内容的授权证明。签名由私钥对消息生成，验证者可以用公钥或地址检查签名是否有效。",
+    example: "💡 签名最容易出问题的地方是用户看不懂自己签了什么。产品应展示签名目的、域名、链 ID、合约地址、额度和到期时间。对 Agent 来说，签名更要有权限边界。"
+  },
+  {
+    topic: "crypto", topicLabel: "🔐 密码学",
+    title: "Merkle Tree · 默克尔树",
+    def: "Merkle Tree 用一组哈希把大量数据组织起来，让你只拿到少量证明也能验证某条数据属于整体。只要 root 被可信记录下来，就能用 Merkle proof 证明「我的数据在这批数据里」，无需下载全部数据。",
+    example: "💡 常见于空投名单、轻客户端、状态证明和可验证数据结构。理解 Merkle Tree 有助于理解为什么区块链可以把大量状态组织成可验证结构。"
+  },
+  {
+    topic: "wallet", topicLabel: "👛 钱包",
+    title: "EOA · 外部账户",
+    def: "EOA（Externally Owned Account）是由私钥控制的账户。它可以签名消息、发起交易、支付 gas、调用合约。大多数浏览器钱包和移动钱包默认给用户创建的都是 EOA。",
+    example: "⚠️ EOA 限制：私钥丢失难恢复，权限很难细分，自动化能力弱，用户体验经常被 gas、网络切换和签名弹窗打断。"
+  },
+  {
+    topic: "wallet", topicLabel: "👛 钱包",
+    title: "Mnemonic · 助记词",
+    def: "助记词是恢复钱包的高风险秘密，不是普通验证码，也不应该被任何应用索要。它的存在是为了让用户更容易备份私钥，但也让钓鱼攻击更容易伪装成「输入助记词恢复账户」。",
+    example: "🚨 任何网页、客服、AI Agent、表单或脚本要求你输入助记词，都应该默认视为危险。正确做法是在钱包应用内部恢复账户，由 dApp 请求连接。"
+  },
+  {
+    topic: "wallet", topicLabel: "👛 钱包",
+    title: "Transaction · 交易",
+    def: "交易是对链上状态的正式请求，一旦成功上链，结果通常不能像数据库记录一样随便撤回。交易可能是转账或调用合约方法。钱包会让用户确认交易内容、链、合约地址、gas 和可能的资产变化。",
+    example: "💡 前端至少要展示：等待钱包确认 → 用户拒绝 → 已广播等待确认 → 成功 → 失败/revert → 长时间 pending。每一步都可能失败。"
+  },
+  {
+    topic: "wallet", topicLabel: "👛 钱包",
+    title: "Gas · 燃料费",
+    def: "Gas 是链上执行成本，既影响用户付费，也影响交易是否能被及时处理。用户发交易时需支付 gas fee；如果 gas 估算不准、网络拥堵或余额不足，交易可能失败或卡住。",
+    example: "⚠️ 产品不能只显示「确认交易」。至少要让用户知道：大概费用是多少、用什么资产支付、失败时是否仍消耗费用、是否可以重试。"
+  },
+  {
+    topic: "wallet", topicLabel: "👛 钱包",
+    title: "Explorer · 区块浏览器",
+    def: "区块浏览器是用户和开发者查看链上事实的窗口。可以查看地址、交易、合约、事件和 token 转移。AI 产品如果引用链上信息，最好给出 explorer 链接或交易哈希，让用户可以自己验证。",
+    example: "💡 看一笔交易至少检查：Status（成功/失败）、From/To（谁发起）、Method（调用方法）、Value（原生资产）、Token Transfers、Logs（event）、Gas Used。"
+  }
+];
+
+let filtered = [...concepts];
+let current = 0;
+let mastered = new Set();
+
+function renderCard(i) {
+  if (filtered.length === 0) return;
+  const c = filtered[i];
+  document.getElementById('cardNum').textContent = `${i+1}/${filtered.length}`;
+  document.getElementById('cardTitle').textContent = c.title;
+  document.getElementById('topicTag').textContent = c.topicLabel;
+  document.getElementById('backTitle').textContent = c.title;
+  document.getElementById('backTopic').textContent = c.topicLabel;
+  document.getElementById('backDef').textContent = c.def;
+  document.getElementById('backExample').innerHTML = c.example;
+  document.getElementById('currentIdx').textContent = i + 1;
+  document.getElementById('totalCards').textContent = filtered.length;
+  const pct = filtered.length > 0 ? (mastered.size / filtered.length * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('masteredCount').textContent = mastered.size;
+  document.getElementById('cardContainer').classList.remove('flipped');
+  // highlight mastered
+  document.getElementById('masterBtn').textContent =
+    mastered.has(c.title) ? '🔓 已掌握' : '✅ 标记掌握';
+  document.getElementById('masterBtn').className =
+    mastered.has(c.title) ? 'btn btn-success btn-sm' : 'btn btn-sm';
+  document.getElementById('masterBtn').style.background =
+    mastered.has(c.title) ? 'var(--success)' : 'var(--surface2)';
+}
+
+function applyFilter(filter) {
+  if (filter === 'all') filtered = [...concepts];
+  else filtered = concepts.filter(c => c.topic === filter);
+  current = 0;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+  if (filtered.length === 0) {
+    document.getElementById('cardTitle').textContent = '暂无卡片';
+    document.getElementById('backDef').textContent = '当前分类没有概念卡片。请切换到其他分类。';
+    document.getElementById('backExample').innerHTML = '';
+    return;
+  }
+  renderCard(current);
+}
+
+// Event listeners
+document.getElementById('cardContainer').addEventListener('click', () => {
+  document.getElementById('cardContainer').classList.toggle('flipped');
+});
+
+document.getElementById('nextBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (filtered.length === 0) return;
+  current = (current + 1) % filtered.length;
+  renderCard(current);
+});
+
+document.getElementById('prevBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (filtered.length === 0) return;
+  current = (current - 1 + filtered.length) % filtered.length;
+  renderCard(current);
+});
+
+document.getElementById('shuffleBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  for (let i = filtered.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+  }
+  current = 0;
+  renderCard(current);
+});
+
+document.getElementById('masterBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (filtered.length === 0) return;
+  const c = filtered[current];
+  if (mastered.has(c.title)) mastered.delete(c.title);
+  else mastered.add(c.title);
+  renderCard(current);
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+});
+
+// keyboard nav
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') document.getElementById('nextBtn').click();
+  if (e.key === 'ArrowLeft') document.getElementById('prevBtn').click();
+  if (e.key === ' ') { e.preventDefault(); document.getElementById('cardContainer').classList.toggle('flipped'); }
+  if (e.key === 'm' || e.key === 'M') document.getElementById('masterBtn').click();
+});
+
+renderCard(0);
+</script>
+</body>
+</html>
