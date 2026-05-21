@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM & Transformer 知识文档</title>
+<style>
+  :root {
+    --bg: #0b0b17;
+    --surface: #13132b;
+    --surface2: #1a1a3a;
+    --border: #2a2a5a;
+    --text: #d0d0e8;
+    --text2: #8888bb;
+    --accent-blue: #60a5fa;
+    --accent-purple: #a78bfa;
+    --accent-green: #34d399;
+    --accent-pink: #f472b6;
+    --accent-orange: #fb923c;
+    --gradient: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* ── LAYOUT ── */
+  .app { display: flex; min-height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+    position: sticky;
+    top: 0; height: 100vh;
+    overflow-y: auto;
+    z-index: 10;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .sidebar h2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    padding: 0 24px;
+    margin-bottom: 16px;
+  }
+  .sidebar-logo {
+    padding: 0 24px;
+    margin-bottom: 28px;
+    font-size: 18px;
+    font-weight: 700;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .sidebar nav a {
+    display: block;
+    padding: 7px 24px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 13px;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .sidebar nav a:hover, .sidebar nav a.active {
+    color: #fff;
+    background: rgba(255,255,255,0.03);
+    border-left-color: var(--accent-purple);
+  }
+  .sidebar nav a.sub { padding-left: 40px; font-size: 12.5px; }
+  .sidebar nav a.sub2 { padding-left: 56px; font-size: 12px; color: #6666aa; }
+
+  /* ── MAIN CONTENT ── */
+  .content {
+    flex: 1;
+    max-width: 880px;
+    padding: 48px 56px 80px;
+  }
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .content { padding: 24px 20px 60px; }
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h1 {
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+  }
+  .subtitle {
+    color: var(--text2);
+    font-size: 15px;
+    margin-bottom: 48px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-top: 48px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .emoji-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+  .emoji-badge.blue { background: rgba(96,165,250,0.15); }
+  .emoji-badge.purple { background: rgba(167,139,250,0.15); }
+  .emoji-badge.green { background: rgba(52,211,153,0.15); }
+  .emoji-badge.pink { background: rgba(244,114,182,0.15); }
+  .emoji-badge.orange { background: rgba(251,146,60,0.15); }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 32px;
+    margin-bottom: 10px;
+    color: #e8e8ff;
+  }
+  h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 6px;
+    color: #c0c0e8;
+  }
+  p { margin-bottom: 14px; color: var(--text); }
+  a { color: var(--accent-blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  ul, ol { margin-bottom: 14px; padding-left: 22px; }
+  li { margin-bottom: 4px; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: rgba(167,139,250,0.3); }
+  .card-title {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1px 8px;
+    border-radius: 6px;
+    margin-left: 4px;
+  }
+  .tag-blue { background: rgba(96,165,250,0.15); color: #93c5fd; }
+  .tag-purple { background: rgba(167,139,250,0.15); color: #c4b5fd; }
+  .tag-green { background: rgba(52,211,153,0.15); color: #6ee7b7; }
+  .tag-pink { background: rgba(244,114,182,0.15); color: #f9a8d4; }
+  .tag-orange { background: rgba(251,146,60,0.15); color: #fdba74; }
+
+  /* ── CODE ── */
+  code {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    color: #e0d8ff;
+  }
+  pre {
+    background: #0a0a1a;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin-bottom: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+  }
+
+  /* ── FORMULA BOX ── */
+  .formula-box {
+    background: rgba(167,139,250,0.06);
+    border: 1px solid rgba(167,139,250,0.15);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    text-align: center;
+    font-size: 17px;
+    font-family: 'Georgia', serif;
+    color: #c4b5fd;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── COMPARE TABLE ── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+  .compare-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+  .compare-card h4 { margin-top: 0; margin-bottom: 10px; }
+
+  /* ── DIAGRAM ── */
+  .diagram {
+    background: #08081a;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre;
+    overflow-x: auto;
+    color: #b0b0d0;
+  }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    border-left: 3px solid;
+  }
+  .callout.info {
+    background: rgba(96,165,250,0.06);
+    border-color: var(--accent-blue);
+  }
+  .callout.warn {
+    background: rgba(251,146,60,0.06);
+    border-color: var(--accent-orange);
+  }
+  .callout.tip {
+    background: rgba(52,211,153,0.06);
+    border-color: var(--accent-green);
+  }
+
+  /* ── QA ── */
+  .qa-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+  }
+  .qa-q {
+    font-weight: 600;
+    color: var(--accent-orange);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .qa-a {
+    color: var(--text);
+    padding-left: 24px;
+  }
+
+  /* ── DIVIDER ── */
+  hr {
+    border: none;
+    height: 1px;
+    background: var(--border);
+    margin: 40px 0;
+  }
+
+  /* ── TOP BUTTON ── */
+  .top-btn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .top-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .top-btn:hover {
+    background: var(--accent-purple);
+    color: #fff;
+    border-color: var(--accent-purple);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ─── SIDEBAR ─── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">🧠 LLM &amp; Transformer<br>知识文档</div>
+  <h2>目录</h2>
+  <nav id="toc">
+    <a href="#sec1">1. NLP 基础概念</a>
+    <a href="#nlp-vs-llm" class="sub">NLP vs LLM</a>
+    <a href="#nlp-tasks" class="sub">NLP 任务类型</a>
+    <a href="#llm-char" class="sub">LLM 核心特征</a>
+    <a href="#llm-limits" class="sub">LLM 局限性</a>
+    <a href="#hf-eco" class="sub">Hugging Face 生态</a>
+    <a href="#sec2">2. Transformer 架构</a>
+    <a href="#rnn-problem" class="sub">RNN 的困境</a>
+    <a href="#attn-is-all" class="sub">Attention Is All You Need</a>
+    <a href="#enc-dec" class="sub">Encoder / Decoder</a>
+    <a href="#dec-only" class="sub">Decoder-Only</a>
+    <a href="#sec3">3. 核心组件详解</a>
+    <a href="#embedding" class="sub">Embedding</a>
+    <a href="#rope" class="sub">位置编码（RoPE）</a>
+    <a href="#self-attn" class="sub">Self-Attention</a>
+    <a href="#qkv" class="sub2">Q、K、V 三剑客</a>
+    <a href="#attn-formula" class="sub2">Attention 公式</a>
+    <a href="#multi-head" class="sub">多头注意力 / GQA</a>
+    <a href="#ffn" class="sub">FFN / SwiGLU</a>
+    <a href="#residual" class="sub">残差连接</a>
+    <a href="#layernorm" class="sub">LayerNorm / RMSNorm</a>
+    <a href="#tokenizer" class="sub">Tokenizer</a>
+    <a href="#sec4">4. 进阶概念</a>
+    <a href="#pipeline" class="sub">pipeline()</a>
+    <a href="#pre-post-norm" class="sub">Pre-Norm vs Post-Norm</a>
+    <a href="#causal-mask" class="sub">因果掩码</a>
+    <a href="#kv-cache" class="sub">KV Cache</a>
+    <a href="#emergent" class="sub">涌现能力</a>
+    <a href="#mini-flow" class="sub">MiniMind 完整流程</a>
+    <a href="#sec5">5. 面试考点</a>
+  </nav>
+</aside>
+
+<!-- ─── CONTENT ─── -->
+<main class="content">
+
+<!-- HERO -->
+<h1>🧠 LLM &amp; Transformer 知识文档</h1>
+<p class="subtitle">
+  基于 Hugging Face LLM Course (Chapter 1) 和 Transformer 全景图整理<br>
+  涵盖 NLP 基础、Transformer 架构、核心组件与进阶概念
+</p>
+
+<!-- ════════════════════════════════════════ -->
+<section id="sec1">
+<h2><span class="emoji-badge blue">📖</span> 1. NLP 基础概念</h2>
+
+<div class="card" id="nlp-vs-llm">
+  <div class="card-title">NLP vs LLM <span class="tag tag-blue">NLP 基础</span></div>
+  <p><b>NLP（Natural Language Processing，自然语言处理）</b>是一门研究计算机理解和生成人类语言的广泛领域。涵盖情感分析、命名实体识别、机器翻译等众多技术。</p>
+  <p><b>LLM（Large Language Model，大语言模型）</b>是 NLP 的一个子集，以其巨大的规模、广泛的训练数据和多任务能力著称。代表：GPT、Llama、Claude 等。</p>
+  <p>简单说：<b>NLP 是领域，LLM 是当前最强大的工具。</b></p>
+</div>
+
+<div class="card" id="nlp-tasks">
+  <div class="card-title">NLP 任务类型 <span class="tag tag-blue">NLP 基础</span></div>
+  <ul>
+    <li><b>整句分类</b> — 情感分析、垃圾邮件检测、语法判断</li>
+    <li><b>序列标注</b> — 词性标注（名词/动词/形容词）、命名实体识别（人名/地点/机构）</li>
+    <li><b>文本生成</b> — 补全、摘要、翻译</li>
+    <li><b>问答</b> — 给定上下文提取答案</li>
+    <li><b>跨模态</b> — 语音转文字、图像描述</li>
+  </ul>
+</div>
+
+<div class="card" id="llm-char">
+  <div class="card-title">LLM 核心特征 <span class="tag tag-blue">NLP 基础</span></div>
+  <ul>
+    <li><b>规模巨大</b> — 数百万到数千亿参数</li>
+    <li><b>通用能力</b> — 无需专门训练即可执行多种任务</li>
+    <li><b>上下文学习（In-Context Learning）</b> — 从提示中的示例学习，无需更新参数</li>
+    <li><b>涌现能力（Emergent Abilities）</b> — 大模型展现出的、小模型不具备的新能力</li>
+  </ul>
+</div>
+
+<div class="card" id="llm-limits">
+  <div class="card-title">LLM 局限性 <span class="tag tag-blue">NLP 基础</span></div>
+  <ul>
+    <li><b>幻觉</b> — 可能自信地生成错误信息</li>
+    <li><b>缺乏真正理解</b> — 纯粹基于统计模式，不能真正"理解"</li>
+    <li><b>偏见</b> — 可能复现训练数据中的偏见</li>
+    <li><b>上下文窗口有限</b> — 虽然正在改善</li>
+    <li><b>计算资源需求大</b> — 训练和推理成本高</li>
+  </ul>
+</div>
+
+<div class="card" id="hf-eco">
+  <div class="card-title">Hugging Face 生态 <span class="tag tag-blue">NLP 基础</span></div>
+  <p>🤗 Hugging Face 提供了完整的 NLP 工具链：</p>
+  <ul>
+    <li><b>🤗 Transformers</b> — 统一的模型接口，支持数千种预训练模型</li>
+    <li><b>🤗 Datasets</b> — 高效的数据集加载与处理</li>
+    <li><b>🤗 Tokenizers</b> — 高速分词器（BPE、WordPiece、SentencePiece）</li>
+    <li><b>🤗 Accelerate</b> — 分布式训练工具</li>
+    <li><b>Hub</b> — 托管模型、数据集、Space，社区共享</li>
+  </ul>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════ -->
+<section id="sec2">
+<h2><span class="emoji-badge purple">🏗️</span> 2. Transformer 架构</h2>
+
+<div class="card" id="rnn-problem">
+  <div class="card-title">为什么需要 Transformer？— RNN 的困境 <span class="tag tag-purple">架构</span></div>
+  <p>2017 年之前，处理语言的主流模型是 <b>RNN（循环神经网络）</b>。它像一个<b>流水线工人</b>，一次只处理一个词，把"记忆"传给下一步。</p>
+  <p><b>致命问题 1：长距离依赖</b> — 就像"传话游戏"，信息经过多步后逐渐丢失。当需要连接句子开头和结尾的信息时，RNN 已经"忘记"了。</p>
+  <p><b>致命问题 2：无法并行计算</b> — RNN 必须按顺序处理，第二个词必须等第一个词处理完。就像排队过一座<b>单车道的桥</b>。</p>
+  <div class="callout info">
+    <b>Transformer 的答案（2017）</b>：用 Attention 机制，每个词可以直接"看到"所有其他词，且所有词同时计算。就像一座<b>立交桥</b>。
+  </div>
+</div>
+
+<div class="card" id="attn-is-all">
+  <div class="card-title">Attention Is All You Need <span class="tag tag-purple">架构</span></div>
+  <p>2017 年 Google 团队的里程碑论文，标题说明了核心思想：<b>注意力就是一切</b>。</p>
+  <p>提出了用纯 Attention 机制替代 RNN 的 Transformer 架构，同时解决了长距离依赖和并行计算两大问题。从此 NLP 领域进入 Transformer 时代。</p>
+  <p>该论文是 2017 年以来 NLP 领域引用量最高、影响最深的论文之一。</p>
+</div>
+
+<div class="card" id="enc-dec">
+  <div class="card-title">Encoder 和 Decoder 的区别 <span class="tag tag-purple">架构</span></div>
+  <p>原始 Transformer 有两个部分：</p>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4>🔊 Encoder（编码器）</h4>
+      <p><b>"理解者"</b> — 读懂输入</p>
+      <p>每个词可以看到<b>所有</b>其他词</p>
+      <p style="color:#60a5fa;">双向注意力</p>
+      <p>适用于：分类、情感分析、语义理解</p>
+    </div>
+    <div class="compare-card">
+      <h4>🎤 Decoder（解码器）</h4>
+      <p><b>"表达者"</b> — 生成输出</p>
+      <p>每个词只能看到<b>它前面</b>的词</p>
+      <p style="color:#a78bfa;">单向/因果注意力</p>
+      <p>适用于：文本生成、翻译、对话</p>
+    </div>
+  </div>
+</div>
+
+<div class="card" id="dec-only">
+  <div class="card-title">Decoder-Only 架构 <span class="tag tag-purple">架构</span></div>
+  <p>MiniMind、GPT、LLaMA 等现代模型使用 <b>纯 Decoder 架构</b>，没有 Encoder 部分。所有输入和输出在同一个序列中处理。</p>
+  <p>通过<b>因果掩码（Causal Mask）</b>确保在训练时，每个 token 只能看到自己及之前的位置，模拟推理时的生成场景。这是目前大模型的主流选择。</p>
+  <div class="diagram">Encoder（双向）:
+  "我 喜欢 编程" → "喜欢"可以同时看到"我"和"编程"
+
+Decoder（单向/因果）:
+  "我 喜欢 编程" → "喜欢"只能看到"我"，看不到"编程"
+                  → "编程"可以看到"我"和"喜欢"</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════ -->
+<section id="sec3">
+<h2><span class="emoji-badge green">⚙️</span> 3. 核心组件详解</h2>
+
+<div class="card" id="embedding">
+  <div class="card-title">Embedding（嵌入层） <span class="tag tag-green">组件</span></div>
+  <p>将离散的 token（词/子词）映射为稠密向量。每个 token 变成一个固定维度的向量（如 MiniMind 中为 768 维）。</p>
+  <p>类比：就像把"菜单翻译成厨房能理解的语言"，将文字转化为模型能处理的数值形式。</p>
+  <p>在 MiniMind 中，embedding 层将 vocab_size（6400）× hidden_size（768）的查找表中检索对应向量。</p>
+</div>
+
+<div class="card" id="rope">
+  <div class="card-title">位置编码 — RoPE（旋转位置编码） <span class="tag tag-green">组件</span></div>
+  <p>Attention 有一个"缺陷"——它是<b>无序的</b>。"小猫追小狗"和"小狗追小猫"对纯 Attention 来说关系一样。因为 Attention 只看"谁和谁相关"，不看"谁在前谁在后"。</p>
+  <p><b>RoPE（Rotary Position Embedding）</b>的核心思想是"旋转"——把位置信息编码为向量空间中的旋转角度。两个位置之间的距离越远，旋转角度越大。</p>
+  <div class="diagram">位置 0 的词向量 → 旋转 0°
+位置 1 的词向量 → 旋转 θ°
+位置 2 的词向量 → 旋转 2θ°
+...</div>
+  <p><b>优势</b>：位置信息自然融入 Q 和 K 的点积运算；可以灵活外推到更长的未见序列。</p>
+</div>
+
+<div class="card" id="self-attn">
+  <div class="card-title">Self-Attention（自注意力机制） <span class="tag tag-green">组件</span></div>
+  <p>这是 Transformer <b>最核心的创新</b>。对于句子中的每个词，计算它应该"关注"其他所有词的程度。</p>
+  <p>类比：读"小猫坐在垫子上，<b>它</b>很舒服"时，你的大脑会回头看句子，判断"它"指的是"小猫"而不是"垫子"。"小猫"得到了高注意力权重。</p>
+  <div class="diagram">输入: "小猫 坐在 垫子 上 它 很 舒服"
+
+当处理"它"时的注意力权重:
+  "小猫" → 0.65 ⭐
+  "垫子" → 0.12
+  "坐在" → 0.05
+  ...</div>
+</div>
+
+<div class="card" id="qkv">
+  <div class="card-title">Q、K、V 三剑客 <span class="tag tag-green">组件</span></div>
+  <p>Self-Attention 有三个核心角色，用<b>查百科全书</b>来类比：</p>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4>🔍 Query（查询）</h4>
+      <p>你的问题 — "我想找什么？"</p>
+    </div>
+    <div class="compare-card">
+      <h4>🏷️ Key（键）</h4>
+      <p>百科标题 — "我这里有什么？"</p>
+    </div>
+    <div class="compare-card" style="grid-column: span 1;">
+      <h4>📄 Value（值）</h4>
+      <p>百科内容 — "如果你来找我，我给你这些信息"</p>
+    </div>
+    <div class="compare-card" style="grid-column: span 1;">
+      <h4>🔄 工作流程</h4>
+      <p>Q·K → 匹配度 → Softmax → 权重 × V</p>
+    </div>
+  </div>
+  <div class="diagram">第 1 步: 每个词生成自己的 Q、K、V
+  "小猫" → Q_小猫, K_小猫, V_小猫
+  "坐在" → Q_坐在, K_坐在, V_坐在
+
+第 2 步: 用 Q 去和所有的 K 做匹配（点积）
+  Q_它 · K_小猫 = 高分 ⭐
+  Q_它 · K_垫子 = 低分
+
+第 3 步: softmax 转化为注意力权重
+  [高分, 低分, ...] → [0.65, 0.12, ...]
+
+第 4 步: 加权求和所有的 V
+  输出_它 = 0.65×V_小猫 + 0.12×V_垫子 + ...</div>
+</div>
+
+<div class="card" id="attn-formula">
+  <div class="card-title">Attention 公式详解 <span class="tag tag-green">组件</span></div>
+  <div class="formula-box">Attention(Q, K, V) = softmax( QK<sup>T</sup> / √d<sub>k</sub> ) V</div>
+  <p><b>第 1 步：QK<sup>T</sup></b> — Q 和 K 做矩阵乘法，得到"注意力分数矩阵"。Q 是"我在找什么"，K 是"我有什么"。两者越相似，分数越高。</p>
+  <p><b>第 2 步：÷ √d<sub>k</sub></b> — <b>缩放</b>。为什么？如果向量维度大，点积结果也会大，softmax 会变得"太极端"——一个接近 1，其余全接近 0。除以 √d<sub>k</sub> 让数值更平滑。</p>
+  <div class="diagram">假设 d_k = 64
+原始分数: [128, 5, 3, 2]
+除以 √64=8: [16, 0.625, 0.375, 0.25]
+softmax 后更平滑，不会过度集中</div>
+  <p><b>第 3 步：Softmax</b> — 将分数归一化为概率分布（0-1，总和为 1）。</p>
+  <p><b>第 4 步：× V</b> — 用注意力权重对 V 做加权求和，得到最终输出。</p>
+  <div class="callout warn">
+    <b>面试常考</b>：不除以 √d<sub>k</sub>，softmax 输入值过大，梯度会趋近于 0，导致训练不稳定。这就是"Scaled Dot-Product Attention"中"Scaled"的由来。
+  </div>
+</div>
+
+<div class="card" id="multi-head">
+  <div class="card-title">多头注意力（Multi-Head Attention / GQA） <span class="tag tag-green">组件</span></div>
+  <p>一个注意力头只能从一个角度理解句子。就像看一幅画：</p>
+  <ul>
+    <li><b>头 1</b> 关注语法关系："它"→"小猫"（代词指代）</li>
+    <li><b>头 2</b> 关注位置关系：相邻词之间的联系</li>
+    <li><b>头 3</b> 关注语义关系："舒服"→"垫子"</li>
+  </ul>
+  <p><b>GQA（Grouped-Query Attention，分组查询注意力）</b>：多个 Q 头共享同一组 K/V 头。</p>
+  <p>MiniMind 中：Q 有 8 个头，K/V 只有 4 个头，每 2 个 Q 头共享 1 个 K/V 头。</p>
+  <p>好处：减少 K/V 参数量和 KV Cache 显存占用，性能损失极小。是 MHA（全部独立）和 MQA（全部共享）的折中方案。</p>
+</div>
+
+<div class="card" id="ffn">
+  <div class="card-title">FFN（前馈神经网络） — SwiGLU <span class="tag tag-green">组件</span></div>
+  <p>Attention 是"收集信息"（开会讨论），FFN 是"消化信息"（会后各自回工位深入思考）。</p>
+  <p>MiniMind 使用 <b>SwiGLU</b> 激活函数：</p>
+  <div class="formula-box">FFN(x) = W<sub>down</sub> · ( SiLU(W<sub>gate</sub> · x) ⊙ W<sub>up</sub> · x )</div>
+  <p>通过一个"门控"机制让模型学会选择性传递信息，效果优于传统 ReLU。其中 ⊙ 表示逐元素乘法。</p>
+  <pre><code>class FeedForward(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.gate_proj = nn.Linear(config.hidden_size, config.intermediate_size, bias=False)
+        self.down_proj = nn.Linear(config.intermediate_size, config.hidden_size, bias=False)
+        self.up_proj = nn.Linear(config.hidden_size, config.intermediate_size, bias=False)
+
+    def forward(self, x):
+        return self.down_proj(F.silu(self.gate_proj(x)) * self.up_proj(x))</code></pre>
+</div>
+
+<div class="card" id="residual">
+  <div class="card-title">残差连接（Residual Connection） <span class="tag tag-green">组件</span></div>
+  <div class="formula-box">output = Layer(x) + x</div>
+  <p>把层的输入直接加到输出上。就像做菜时，即使加了很多调料，也保留食材的原味，不至于完全变味。</p>
+  <p><b>三大作用</b>：</p>
+  <ol>
+    <li><b>解决梯度消失</b> — 反向传播时，梯度可以通过"捷径"直接流回浅层</li>
+    <li><b>让深层网络可训练</b> — 没有残差连接，超过 20 层的网络几乎无法训练</li>
+    <li><b>保底不退步</b> — 最差情况，如果某层没学到有用的东西，输出至少等于输入</li>
+  </ol>
+</div>
+
+<div class="card" id="layernorm">
+  <div class="card-title">LayerNorm / RMSNorm（层归一化） <span class="tag tag-green">组件</span></div>
+  <p>对每个样本的特征做归一化，让均值为 0、方差为 1。就像考试后的"标准化评分"。</p>
+  <p><b>RMSNorm</b>：LayerNorm 的简化版，只做缩放不减去均值：</p>
+  <div class="formula-box">RMSNorm(x) = x / √mean(x²) × γ</div>
+  <p>计算更快，效果相当。被 LLaMA、MiniMind 等广泛使用。</p>
+  <p>MiniMind 采用 <b>Pre-Norm</b> 位置（先归一化再做 Attention/FFN），而非原始 Transformer 的 Post-Norm。</p>
+</div>
+
+<div class="card" id="tokenizer">
+  <div class="card-title">Tokenizer（分词器） <span class="tag tag-green">组件</span></div>
+  <p>将原始文本转换为模型能处理的 token ID 序列。</p>
+  <p>例如： "今天天气" → token_ids: [234, 567, 567, 891]</p>
+  <p>🤗 Tokenizers 库支持 BPE、WordPiece、SentencePiece 等算法。分词是 NLP 流水线的第一步，直接影响模型对语言的理解粒度。</p>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════ -->
+<section id="sec4">
+<h2><span class="emoji-badge pink">🚀</span> 4. 进阶概念</h2>
+
+<div class="card" id="pipeline">
+  <div class="card-title">pipeline() 函数 <span class="tag tag-pink">进阶</span></div>
+  <p>Hugging Face Transformers 库最简洁的 API。一行代码完成情感分析、文本生成、问答等任务：</p>
+  <pre><code>from transformers import pipeline
+
+# 情感分析
+classifier = pipeline("sentiment-analysis")
+result = classifier("I love this course!")
+# [{'label': 'POSITIVE', 'score': 0.9999}]
+
+# 文本生成
+generator = pipeline("text-generation", model="gpt2")
+generator("Once upon a time")</code></pre>
+  <p>pipeline() 自动处理分词、模型推理、结果后处理的全流程。</p>
+</div>
+
+<div class="card" id="pre-post-norm">
+  <div class="card-title">Pre-Norm vs Post-Norm <span class="tag tag-pink">进阶</span></div>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4>📌 Post-Norm（原始 Transformer）</h4>
+      <p>y = Norm( F(x) + x )</p>
+      <p>在子层之后归一化</p>
+      <p style="color:#888;">需要 warm-up，训练不稳定</p>
+    </div>
+    <div class="compare-card">
+      <h4>📌 Pre-Norm（现代标准）</h4>
+      <p>y = F( Norm(x) ) + x</p>
+      <p>在子层之前归一化</p>
+      <p style="color:#34d399;">训练稳定，无需 warm-up</p>
+    </div>
+  </div>
+  <p>MiniMind 使用 Pre-Norm + RMSNorm。Pre-Norm 已成为大模型标配，梯度流动更顺畅。</p>
+</div>
+
+<div class="card" id="causal-mask">
+  <div class="card-title">因果掩码（Causal Mask） <span class="tag tag-pink">进阶</span></div>
+  <p>Decoder-Only 模型的关键机制。确保每个 token 只能关注当前位置及之前的 token，不能"偷看"未来的 token。</p>
+  <p>在训练时模拟推理时的生成场景。通常实现为一个<b>上三角矩阵</b>，未来位置被设为 -inf。</p>
+  <div class="diagram">因果掩码矩阵（✓=可看，✗=不可看）:
+        Token1  Token2  Token3  Token4
+Token1   ✓       ✗       ✗       ✗
+Token2   ✓       ✓       ✗       ✗
+Token3   ✓       ✓       ✓       ✗
+Token4   ✓       ✓       ✓       ✓</div>
+</div>
+
+<div class="card" id="kv-cache">
+  <div class="card-title">KV Cache <span class="tag tag-pink">进阶</span></div>
+  <p>推理优化技术。在自回归生成中，每步只需计算新 token 的 Q，已生成 token 的 K 和 V 可以缓存复用，避免重复计算。</p>
+  <p>GQA 通过减少 K/V 头数，进一步降低 KV Cache 的显存占用。这是大模型推理加速的核心技术之一。</p>
+</div>
+
+<div class="card" id="emergent">
+  <div class="card-title">涌现能力（Emergent Abilities） <span class="tag tag-pink">进阶</span></div>
+  <p>当模型规模超过某个阈值时，突然展现出小模型没有的能力：</p>
+  <ul>
+    <li>链式推理（Chain-of-Thought）</li>
+    <li>代码理解与生成</li>
+    <li>多语言翻译</li>
+    <li>数学推理</li>
+  </ul>
+  <p>这些能力不是被显式编程的，而是在大规模训练中"涌现"出来的，是 LLM 最令人惊讶的特性之一。</p>
+</div>
+
+<div class="card" id="mini-flow">
+  <div class="card-title">MiniMind 完整前向流程 <span class="tag tag-pink">进阶</span></div>
+  <div class="diagram">输入文字: "今天天气"
+    │
+    ▼
+[Tokenizer] → token_ids: [234, 567, 567, 891]
+    │
+    ▼
+[Embedding] → 每个 token 变成 768 维向量
+    │
+    ▼
+[RoPE 位置编码] → 给每个向量加上位置信息
+    │
+    ▼
+[Block 1] → RMSNorm → GQA Attention → 残差 → RMSNorm → SwiGLU FFN → 残差
+[Block 2] → 同上
+[Block 3] → 同上
+  ...
+[Block 8] → 同上
+    │
+    ▼
+[RMSNorm] → 最后做一次归一化
+    │
+    ▼
+[lm_head] → 768 维 → 6400 维（vocab_size 每个 token 一个分数）
+    │
+    ▼
+[softmax + 采样] → 选出下一个 token</div>
+  <p>一个 MiniMind Block 的结构：</p>
+  <div class="diagram">┌──────────────────────────────┐
+│        输入 x                 │
+│         │                    │
+│   ┌─────┴─────┐              │
+│   │ RMSNorm   │              │
+│   │ GQA Attn  │              │
+│   └─────┬─────┘              │
+│    + x (残差连接)             │
+│         │                    │
+│   ┌─────┴─────┐              │
+│   │ RMSNorm   │              │
+│   │ SwiGLU FFN│              │
+│   └─────┬─────┘              │
+│    + x (残差连接)             │
+│         │                    │
+│        输出                  │
+└──────────────────────────────┘</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════ -->
+<section id="sec5">
+<h2><span class="emoji-badge orange">🎯</span> 5. 面试考点</h2>
+
+<div class="qa-item">
+  <div class="qa-q">Q1: Attention 公式中为什么要除以 √d<sub>k</sub>？</div>
+  <div class="qa-a">
+    <p>当 Key 的维度 d<sub>k</sub> 较大时，Q·K 的点积结果方差约为 d<sub>k</sub>。数值过大会导致 softmax 的输入分布极端化——一个值接近 1，其余接近 0，梯度趋近于 0（梯度消失）。除以 √d<sub>k</sub> 将方差控制在 1 附近，保证梯度正常流动。这种做法称为 <b>Scaled Dot-Product Attention</b>。</p>
+  </div>
+</div>
+
+<div class="qa-item">
+  <div class="qa-q">Q2: 残差连接的作用是什么？如果去掉会怎样？</div>
+  <div class="qa-a">
+    <p>残差连接（y = F(x) + x）有三个作用：</p>
+    <ol>
+      <li><b>缓解梯度消失</b> — 梯度通过"短路"直接传回浅层</li>
+      <li><b>使深层网络可训练</b> — ResNet 证明，无残差连接时深层网络性能反而下降（退化问题）</li>
+      <li><b>保证下限</b> — 即使某层完全没学到有用变换，输出至少等于输入</li>
+    </ol>
+    <p>没有残差连接，Transformer 在 8 层以上时几乎无法训练。</p>
+  </div>
+</div>
+
+<div class="qa-item">
+  <div class="qa-q">Q3: Transformer 相比 RNN 的并行性优势体现在哪里？</div>
+  <div class="qa-a">
+    <p>RNN：必须先处理第 1 个 token 拿到隐藏状态，才能处理第 2 个。序列长度 N → N 步串行计算。</p>
+    <p>Transformer：Self-Attention 一次性计算所有 token 的关系（QK<sup>T</sup> 是一次矩阵乘法），所有位置并行处理。时间复杂度从 O(N) 步串行降为 O(1) 步并行。</p>
+    <p>代价：空间复杂度 O(N²)，因为需要存储 N×N 的注意力矩阵。</p>
+  </div>
+</div>
+
+<div class="qa-item">
+  <div class="qa-q">Q4: 什么是 GQA？MiniMind 为什么用它？</div>
+  <div class="qa-a">
+    <p><b>GQA（Grouped-Query Attention）</b>让 K 和 V 的头数少于 Q 的头数——多个 Q 头共享同一组 K/V 头。</p>
+    <p>MHA = 每一个 Q 头有独立的 K/V 头（全独立，性能好但开销大）<br>
+    MQA = 所有 Q 头共享 1 个 K/V 头（极省显存但性能有损失）<br>
+    GQA = 折中方案：8 个 Q 头共享 4 个 K/V 头</p>
+    <p>好处：减少 K/V 参数量和 KV Cache 显存占用，性能损失极小。</p>
+  </div>
+</div>
+
+<div class="qa-item">
+  <div class="qa-q">Q5: Pre-Norm 和 Post-Norm 有什么区别？</div>
+  <div class="qa-a">
+    <p><b>Post-Norm</b>（原始 Transformer）：y = Norm(F(x) + x) — 在子层之后做归一化</p>
+    <p><b>Pre-Norm</b>（现代标准）：y = F(Norm(x)) + x — 在子层之前做归一化</p>
+    <p>Pre-Norm 优势：训练更稳定，不需要 warm-up，梯度流动更顺畅。理论上 Post-Norm 收敛后效果上限可能略高，但实践中 Pre-Norm 已成为大模型标配。</p>
+  </div>
+</div>
+
+</section>
+
+<hr>
+
+<footer style="text-align:center; color:#666; font-size:13px; padding: 20px 0;">
+  <p>基于 <a href="https://huggingface.co/learn/llm-course/chapter1">Hugging Face LLM Course</a> 和 <a href="https://github.com/bcefghj/learn-minimind/blob/main/docs/L02-Transformer%E5%85%A8%E6%99%AF%E5%9B%BE.md">Transformer 全景图</a> 整理</p>
+</footer>
+
+</main>
+</div>
+
+<!-- TOP BUTTON -->
+<button class="top-btn" id="topBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// Show/hide top button
+window.addEventListener('scroll', () => {
+  document.getElementById('topBtn').classList.toggle('visible', window.scrollY > 400);
+});
+
+// Active sidebar link tracking
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+      const id = entry.target.getAttribute('id');
+      const link = document.querySelector(`.sidebar nav a[href="#${id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+document.querySelectorAll('section .card, section h2').forEach(el => {
+  const id = el.getAttribute('id');
+  if (id) observer.observe(el);
+});
+</script>
+</body>
+</html>
