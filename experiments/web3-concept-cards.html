@@ -113,7 +113,7 @@
     min-height: 320px;
     backface-visibility: hidden;
     border-radius: var(--radius);
-    padding: 32px 28px;
+    padding: 24px 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -429,6 +429,8 @@ function renderCard(i) {
   document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('masteredCount').textContent = mastered.size;
   document.getElementById('cardContainer').classList.remove('flipped');
+  // Reset container height
+  document.getElementById('cardContainer').style.minHeight = '';
   // highlight mastered
   document.getElementById('masterBtn').textContent =
     mastered.has(c.title) ? '🔓 已掌握' : '✅ 标记掌握';
@@ -455,7 +457,15 @@ function applyFilter(filter) {
 
 // Event listeners
 document.getElementById('cardContainer').addEventListener('click', () => {
-  document.getElementById('cardContainer').classList.toggle('flipped');
+  const container = document.getElementById('cardContainer');
+  const back = document.getElementById('cardBack');
+  container.classList.toggle('flipped');
+  if (container.classList.contains('flipped')) {
+    // Measure back content and expand container
+    container.style.minHeight = Math.max(320, back.scrollHeight) + 'px';
+  } else {
+    container.style.minHeight = '';
+  }
 });
 
 document.getElementById('nextBtn').addEventListener('click', (e) => {
