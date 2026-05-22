@@ -121,6 +121,7 @@
     justify-content: center;
     align-items: center;
     min-height: 280px;
+    position: relative;
   }
   .card-container.flipped .card-front { display: none; }
 
@@ -253,6 +254,9 @@
 </div>
 
 <div class="progress-bar">
+  <div class="progress-fill" id="progressFill" style="width:0%"></div>
+</div>
+
 <div class="stats">
   <span>📇 <em id="currentIdx">1</em> / <em id="totalCards">20</em></span>
   <span>✅ 已掌握: <em id="masteredCount">0</em></span>
