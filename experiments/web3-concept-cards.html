@@ -101,30 +101,40 @@
   .card-inner {
     position: relative;
     width: 100%;
-    min-height: 320px;
-    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-    transform-style: preserve-3d;
+    min-height: 200px;
+    transition: min-height 0.3s ease;
   }
-  .card-container.flipped .card-inner { transform: rotateY(180deg); }
 
   .card-face {
-    position: absolute;
     width: 100%;
-    min-height: 320px;
-    backface-visibility: hidden;
     border-radius: var(--radius);
     padding: 24px 20px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
     text-align: center;
+    transition: opacity 0.3s ease;
   }
   .card-front {
     background: var(--card-front);
     border: 1px solid var(--surface2);
     box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    justify-content: center;
+    align-items: center;
+    min-height: 280px;
   }
+  .card-container.flipped .card-front { display: none; }
+
+  .card-back {
+    background: var(--card-back);
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 24px 20px;
+    text-align: left;
+    display: none;
+    min-height: 280px;
+  }
+  .card-container.flipped .card-back { display: flex; }
+
   .card-front .topic-tag {
     position: absolute;
     top: 16px;
@@ -152,15 +162,7 @@
     font-size: 0.85em;
     color: var(--text2);
   }
-  .card-back {
-    background: var(--card-back);
-    transform: rotateY(180deg);
-    justify-content: flex-start;
-    align-items: flex-start;
-    padding: 24px 20px;
-    overflow-y: auto;
-    text-align: left;
-  }
+
   .card-back h3 {
     font-size: 1.05em;
     font-weight: 700;
@@ -429,8 +431,6 @@ function renderCard(i) {
   document.getElementById('progressFill').style.width = pct + '%';
   document.getElementById('masteredCount').textContent = mastered.size;
   document.getElementById('cardContainer').classList.remove('flipped');
-  // Reset container height
-  document.getElementById('cardContainer').style.minHeight = '';
   // highlight mastered
   document.getElementById('masterBtn').textContent =
     mastered.has(c.title) ? '🔓 已掌握' : '✅ 标记掌握';
@@ -457,15 +457,7 @@ function applyFilter(filter) {
 
 // Event listeners
 document.getElementById('cardContainer').addEventListener('click', () => {
-  const container = document.getElementById('cardContainer');
-  const back = document.getElementById('cardBack');
-  container.classList.toggle('flipped');
-  if (container.classList.contains('flipped')) {
-    // Measure back content and expand container
-    container.style.minHeight = Math.max(320, back.scrollHeight) + 'px';
-  } else {
-    container.style.minHeight = '';
-  }
+  document.getElementById('cardContainer').classList.toggle('flipped');
 });
 
 document.getElementById('nextBtn').addEventListener('click', (e) => {
