@@ -238,7 +238,7 @@
 </div>
 
  <div class="tabs" id="tabs">
-  <button class="tab-btn active" data-filter="all">全部 (19)</button>
+  <button class="tab-btn active" data-filter="all">全部 (20)</button>
   <button class="tab-btn" data-filter="network">🌐 网络</button>
   <button class="tab-btn" data-filter="crypto">🔐 密码学</button>
   <button class="tab-btn" data-filter="wallet">👛 钱包</button>
@@ -248,7 +248,7 @@
 
 <div class="progress-bar">
 <div class="stats">
-  <span>📇 <em id="currentIdx">1</em> / <em id="totalCards">19</em></span>
+  <span>📇 <em id="currentIdx">1</em> / <em id="totalCards">20</em></span>
   <span>✅ 已掌握: <em id="masteredCount">0</em></span>
 </div>
 
@@ -256,7 +256,7 @@
   <div class="card-inner" id="cardInner">
     <div class="card-face card-front" id="cardFront">
       <span class="topic-tag" id="topicTag">网络</span>
-      <span class="card-number" id="cardNum">1/19</span>
+      <span class="card-number" id="cardNum">1/20</span>
       <h2 id="cardTitle">Block</h2>
       <p class="hint">👆 点击翻转查看定义</p>
     </div>
@@ -378,6 +378,12 @@ const concepts = [
     title: "Explorer · 区块浏览器",
     def: "区块浏览器是用户和开发者查看链上事实的窗口。可以查看地址、交易、合约、事件和 token 转移。AI 产品如果引用链上信息，最好给出 explorer 链接或交易哈希，让用户可以自己验证。",
     example: "💡 看一笔交易至少检查：Status（成功/失败）、From/To（谁发起）、Method（调用方法）、Value（原生资产）、Token Transfers、Logs（event）、Gas Used。"
+  },
+  {
+    topic: "wallet", topicLabel: "👛 钱包",
+    title: "Wallet Types · 钱包类型",
+    def: "钱包按不同维度分类：1️⃣ 按私钥托管：Custodial（平台管，如 Binance）vs Non-Custodial（自管，如 MetaMask）。2️⃣ 按私钥生成方式：EOA（外部账户，助记词生成）vs CA/合约钱包（智能合约控制，可多签/社交恢复）。3️⃣ 按存储方式：Hot Wallet（热钱包，浏览器插件/手机 App，方便但风险高）vs Cold Wallet（冷钱包，硬件设备如 Ledger，安全但不便）vs Paper Wallet（纸钱包离线存放）。4️⃣ 按链支持：单链 vs 多链。",
+    example: "💡 你现在的 MetaMask 是：热钱包 + 非托管 + EOA + 多链。如果以后存大额资产，建议配合硬件冷钱包。ERC-4337（账户抽象）正在让合约钱包变得主流，未来可能不需要助记词。"
   },
   {
     topic: "exchange", topicLabel: "🏛️ 交易所",
