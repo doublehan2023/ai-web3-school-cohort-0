@@ -237,17 +237,18 @@
   <p>基于 AI × Web3 School Handbook 的交互式学习工具<br>点击卡片翻转查看定义 ←→</p>
 </div>
 
-<div class="tabs" id="tabs">
-  <button class="tab-btn active" data-filter="all">全部 (18)</button>
+ <div class="tabs" id="tabs">
+  <button class="tab-btn active" data-filter="all">全部 (19)</button>
   <button class="tab-btn" data-filter="network">🌐 网络</button>
   <button class="tab-btn" data-filter="crypto">🔐 密码学</button>
   <button class="tab-btn" data-filter="wallet">👛 钱包</button>
   <button class="tab-btn" data-filter="exchange">🏛️ 交易所</button>
+  <button class="tab-btn" data-filter="tx-model">🔄 交易模型</button>
 </div>
 
-<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+<div class="progress-bar">
 <div class="stats">
-  <span>📇 <em id="currentIdx">1</em> / <em id="totalCards">16</em></span>
+  <span>📇 <em id="currentIdx">1</em> / <em id="totalCards">19</em></span>
   <span>✅ 已掌握: <em id="masteredCount">0</em></span>
 </div>
 
@@ -255,7 +256,7 @@
   <div class="card-inner" id="cardInner">
     <div class="card-face card-front" id="cardFront">
       <span class="topic-tag" id="topicTag">网络</span>
-      <span class="card-number" id="cardNum">1/16</span>
+      <span class="card-number" id="cardNum">1/19</span>
       <h2 id="cardTitle">Block</h2>
       <p class="hint">👆 点击翻转查看定义</p>
     </div>
@@ -389,6 +390,12 @@ const concepts = [
     title: "DeFi · 去中心化金融",
     def: "DeFi（Decentralized Finance，去中心化金融）是用智能合约替代传统金融中间人的模式。不需要银行或交易所托管资产，而是通过链上合约实现借贷、交易、理财等金融服务。所有代码开源、资产自托管、无需 KYC。典型应用：Uniswap（兑换）、Aave（借贷）、Compound（存币生息）。",
     example: "💡 DeFi vs CeFi（中心化金融，如 Binance）的核心区别：CeFi 信任平台，DeFi 信任代码。CeFi 速度快但可被审查/冻结，DeFi 无需许可但风险自担（合约漏洞、滑点、无常损失）。"
+  },
+  {
+    topic: "tx-model", topicLabel: "🔄 交易模型",
+    title: "Web2 vs Web3 交易模型",
+    def: "Web2 交易是「客户端请求 → 服务器修改数据库 → 返回结果」。服务器管理员可以回滚、修改、删除任何记录。Web3 交易是「用户签名 → 广播到网络 → 节点验证共识 → 写入不可篡改的链」。一旦上链确认，没有人（包括合约作者）能单方面撤回或篡改。",
+    example: "⚠️ Web3 交易不可逆是把双刃剑。用户付了 gas 但填错地址 → 钱拿不回来。合约有 bug 但已上链 → 只能通过新合约迁移。这是 Web3 把控制权从平台还给个人的代价：你负责，你承担。"
   }
 ];
 
