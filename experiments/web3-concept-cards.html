@@ -238,10 +238,11 @@
 </div>
 
 <div class="tabs" id="tabs">
-  <button class="tab-btn active" data-filter="all">全部 (16)</button>
+  <button class="tab-btn active" data-filter="all">全部 (17)</button>
   <button class="tab-btn" data-filter="network">🌐 网络</button>
   <button class="tab-btn" data-filter="crypto">🔐 密码学</button>
   <button class="tab-btn" data-filter="wallet">👛 钱包</button>
+  <button class="tab-btn" data-filter="exchange">🏛️ 交易所</button>
 </div>
 
 <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
@@ -376,6 +377,12 @@ const concepts = [
     title: "Explorer · 区块浏览器",
     def: "区块浏览器是用户和开发者查看链上事实的窗口。可以查看地址、交易、合约、事件和 token 转移。AI 产品如果引用链上信息，最好给出 explorer 链接或交易哈希，让用户可以自己验证。",
     example: "💡 看一笔交易至少检查：Status（成功/失败）、From/To（谁发起）、Method（调用方法）、Value（原生资产）、Token Transfers、Logs（event）、Gas Used。"
+  },
+  {
+    topic: "exchange", topicLabel: "🏛️ 交易所",
+    title: "CEX · 中心化交易所",
+    def: "CEX（Centralized Exchange，中心化交易所）是平台托管用户资产的交易模式。你把资产存入平台钱包，平台在链下数据库里记账，交易在平台内部撮合完成而不在链上逐笔结算。优点是速度快、流动性好、用户体验友好；缺点是平台控制私钥（Not your keys, not your coins）、需要 KYC 认证、平台可能被黑或跑路。典型例子：Binance、Coinbase、OKX、Bybit。",
+    example: "⚠️ CEX 和 DEX 的核心区别不是「哪个更好用」，而是谁控制资产。CEX 里用户不持有私钥，平台可以冻结账户或限制提现。理解 CEX 有助于理解为什么 Web3 强调「Not your keys, not your coins」。"
   }
 ];
 
