@@ -238,7 +238,7 @@
 </div>
 
 <div class="tabs" id="tabs">
-  <button class="tab-btn active" data-filter="all">全部 (17)</button>
+  <button class="tab-btn active" data-filter="all">全部 (18)</button>
   <button class="tab-btn" data-filter="network">🌐 网络</button>
   <button class="tab-btn" data-filter="crypto">🔐 密码学</button>
   <button class="tab-btn" data-filter="wallet">👛 钱包</button>
@@ -383,6 +383,12 @@ const concepts = [
     title: "CEX · 中心化交易所",
     def: "CEX（Centralized Exchange，中心化交易所）是平台托管用户资产的交易模式。你把资产存入平台钱包，平台在链下数据库里记账，交易在平台内部撮合完成而不在链上逐笔结算。优点是速度快、流动性好、用户体验友好；缺点是平台控制私钥（Not your keys, not your coins）、需要 KYC 认证、平台可能被黑或跑路。典型例子：Binance、Coinbase、OKX、Bybit。",
     example: "⚠️ CEX 和 DEX 的核心区别不是「哪个更好用」，而是谁控制资产。CEX 里用户不持有私钥，平台可以冻结账户或限制提现。理解 CEX 有助于理解为什么 Web3 强调「Not your keys, not your coins」。"
+  },
+  {
+    topic: "exchange", topicLabel: "🏛️ 交易所",
+    title: "DeFi · 去中心化金融",
+    def: "DeFi（Decentralized Finance，去中心化金融）是用智能合约替代传统金融中间人的模式。不需要银行或交易所托管资产，而是通过链上合约实现借贷、交易、理财等金融服务。所有代码开源、资产自托管、无需 KYC。典型应用：Uniswap（兑换）、Aave（借贷）、Compound（存币生息）。",
+    example: "💡 DeFi vs CeFi（中心化金融，如 Binance）的核心区别：CeFi 信任平台，DeFi 信任代码。CeFi 速度快但可被审查/冻结，DeFi 无需许可但风险自担（合约漏洞、滑点、无常损失）。"
   }
 ];
 
